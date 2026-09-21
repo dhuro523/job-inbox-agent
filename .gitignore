@@ -12,6 +12,7 @@ htmlcov/
 *.token
 token.json
 credentials.json
+client_secret.json
 
 # Docker
 .docker/
@@ -22,4 +23,6 @@ credentials.json
 # IDE
 .vscode/
 .idea/
-client_secret.json
+
+# Data
+data/
