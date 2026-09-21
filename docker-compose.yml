@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: job-inbox-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: jobagent
+      POSTGRES_PASSWORD: jobagent_dev_password
+      POSTGRES_DB: job_inbox
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
