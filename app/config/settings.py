@@ -18,6 +18,7 @@ class Settings:
     google_client_secret_file: str
     google_token_file: str
     gmail_scopes: list[str]
+    groq_api_key: str
 
 
 def load_settings() -> Settings:
@@ -32,6 +33,7 @@ def load_settings() -> Settings:
         ),
         google_token_file=os.getenv("GOOGLE_TOKEN_FILE", "token.json"),
         gmail_scopes=[s.strip() for s in scopes_raw.split(",")],
+        groq_api_key=os.getenv("GROQ_API_KEY", ""),
     )
 
 
