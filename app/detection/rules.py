@@ -32,8 +32,11 @@ POSITIVE_KEYWORDS = [
     "application submitted",
     "thank you for applying",
     "thanks for applying",
+    "thank you for submitting",
     "your application",
     "application received",
+    "application has reached us",
+    "reviewing your application",
     "interview",
     "assessment",
     "coding challenge",
@@ -49,7 +52,6 @@ POSITIVE_KEYWORDS = [
     "position",
     "role you applied",
 ]
-
 # Strong negative signals — these push AWAY from job-related even if
 # other weak signals are present
 NEGATIVE_KEYWORDS = [
