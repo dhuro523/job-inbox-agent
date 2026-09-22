@@ -1,5 +1,6 @@
 from app.extraction.schema import ExtractedApplicationData
 from app.matching.application_service import create_or_get_application
+from app.models.application import Application
 
 
 class FakeQuery:
@@ -56,8 +57,26 @@ def make_extracted(**overrides):
         "source": None,
         "confidence": 0.95,
     }
+
     data.update(overrides)
+
     return ExtractedApplicationData(**data)
+
+
+def make_application(
+    company: str,
+    role: str,
+    application_id: int = 1,
+) -> Application:
+    application = Application(
+        company=company,
+        role=role,
+        current_status="APPLIED",
+    )
+
+    application.id = application_id
+
+    return application
 
 
 def test_creates_new_application_and_event():
@@ -114,3 +133,51 @@ def test_returns_none_when_company_or_role_missing():
     assert result is None
     assert len(db.applications) == 0
     assert len(db.events) == 0
+
+
+def test_does_not_move_status_backward():
+    db = FakeSession()
+
+    application = make_application(
+        "Mercor",
+        "Software Engineer, Python",
+    )
+
+    application.current_status = "INTERVIEW"
+    db.applications.append(application)
+
+    result = create_or_get_application(
+        db,
+        make_extracted(
+            event_type="APPLICATION_RECEIVED",
+        ),
+        email_id=789,
+    )
+
+    assert result.current_status == "INTERVIEW"
+    assert len(db.applications) == 1
+    assert len(db.events) == 1
+
+
+def test_does_not_move_rejected_back_to_applied():
+    db = FakeSession()
+
+    application = make_application(
+        "Mercor",
+        "Software Engineer, Python",
+    )
+
+    application.current_status = "REJECTED"
+    db.applications.append(application)
+
+    result = create_or_get_application(
+        db,
+        make_extracted(
+            event_type="APPLICATION_SUBMITTED",
+        ),
+        email_id=790,
+    )
+
+    assert result.current_status == "REJECTED"
+    assert len(db.applications) == 1
+    assert len(db.events) == 1
