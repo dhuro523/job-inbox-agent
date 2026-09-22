@@ -10,6 +10,10 @@ misconfiguration fail fast (at startup) instead of silently later.
 import os
 from dataclasses import dataclass
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 @dataclass(frozen=True)
 class Settings:
