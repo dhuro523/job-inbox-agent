@@ -2,30 +2,17 @@ import logging
 
 from sqlalchemy.orm import Session
 
+from app.database.email_repository import save_email
+from app.detection.category_classifier import classify_category
 from app.detection.pipeline import classify_email
 from app.extraction.extractor import extract_application_data
 from app.gmail.client import EmailMessage
-from app.database.email_repository import save_email
 from app.matching.application_service import create_or_get_application
 
 logger = logging.getLogger(__name__)
 
 
-def process_email(
-    db: Session,
-    message: EmailMessage,
-) -> dict:
-    """
-    Process one Gmail message through the complete job-email pipeline.
-
-    Flow:
-    1. Detect whether the email is job-related.
-    2. If not job-related, stop.
-    3. Save the email to PostgreSQL.
-    4. Extract structured application data.
-    5. Create/reuse the application and record the event.
-    """
-
+def process_email(db: Session, message: EmailMessage) -> dict:
     detection = classify_email(
         sender=message.sender,
         subject=message.subject,
@@ -46,6 +33,7 @@ def process_email(
             "is_job_related": False,
             "detection_confidence": detection.confidence,
             "decided_by": detection.decided_by,
+            "category": "OTHER",
             "application_id": None,
             "event_type": None,
         }
@@ -68,6 +56,17 @@ def process_email(
         received_at=message.received_at,
     )
 
+    category = classify_category(
+        is_job_related=True,
+        extracted=extracted,
+    )
+
+    logger.info(
+        "Category result: subject=%r category=%s",
+        message.subject,
+        category,
+    )
+
     application = create_or_get_application(
         db=db,
         extracted=extracted,
@@ -79,6 +78,7 @@ def process_email(
         "is_job_related": True,
         "detection_confidence": detection.confidence,
         "decided_by": detection.decided_by,
+        "category": category,
         "application_id": application.id if application else None,
         "event_type": extracted.event_type,
     }
