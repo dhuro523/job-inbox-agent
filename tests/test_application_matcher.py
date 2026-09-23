@@ -83,18 +83,28 @@ def test_does_not_match_different_company():
 
     assert result is None
 
-
-def test_returns_none_when_company_or_role_is_missing():
+def test_matches_by_role_when_company_is_missing():
     application = make_application(
         "Mercor",
         "Software Engineer, Python",
     )
     db = FakeSession([application])
 
-    assert find_existing_application(
-        db, None, "Software Engineer, Python"
-    ) is None
+    result = find_existing_application(
+        db,
+        None,
+        "Software Engineer, Python",
+    )
 
-    assert find_existing_application(
-        db, "Mercor", None
-    ) is None
+    assert result is application
+    assert result.id == 1
+
+
+def test_returns_none_when_role_is_missing():
+    application = make_application(
+        "Mercor",
+        "Software Engineer, Python",
+    )
+    db = FakeSession([application])
+
+    assert find_existing_application(db, "Mercor", None) is None

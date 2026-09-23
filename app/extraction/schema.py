@@ -20,13 +20,16 @@ class ExtractedApplicationData(BaseModel):
         "OFFER",
         "WITHDRAWN",
         "FOLLOW_UP",
+        "JOB_ALERT",
         "OTHER",
     ] | None = None
 
     event_date: date | None = None
     deadline: date | None = None
-
     application_status: str | None = None
     source: str | None = None
 
-    confidence: float = Field(ge=0.0, le=1.0)
+    confidence: float = Field(
+        ge=0.0,
+        le=1.0,
+    )
